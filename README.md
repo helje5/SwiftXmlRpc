@@ -20,6 +20,12 @@ client.call("system.listMethods") { error, value in
 }
 ```
 
+The package also contains a small XML-RPC commandline client.
+It can be invoked like that:
+```bash
+swift run xmlrpc_call "http://yourserver/RPC2" system.listMethods
+```
+
 ### Links
 
 - [XML-RPC](http://xmlrpc.com).com
