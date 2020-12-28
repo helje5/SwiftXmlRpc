@@ -10,6 +10,7 @@ Performing a simple call:
 import XmlRpc
 
 let client = XmlRpcClient(URL(string: "https://www.xmlrpc.com/RPC2")!)
+
 client.call("system.listMethods") { error, value in
   if let error = error {
     print("Call failed with error:", error)
