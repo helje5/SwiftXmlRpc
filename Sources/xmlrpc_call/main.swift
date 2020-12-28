@@ -22,12 +22,19 @@ guard let url = URL(string: args[1]) else {
   exit(2)
 }
 
+// TODO: rather do the URLSession trampoline
+let auth : String = {
+  guard let user = url.user else { return "" }
+  let pair = user + ":" + (url.password ?? "")
+  return "Basic " + Data(pair.utf8).base64EncodedString()
+}()
+
 let invocation = XmlRpc.Call(
   args[2],
   parameters: args[3...].map { XmlRpc.Value($0) }
 )
 
-let client = XmlRpcClient(url: url)
+let client = XmlRpcClient(url: url, authorization: auth)
 
 func handleError(_ error: XmlRpcClient.ClientError) -> Never {
   switch error {
@@ -81,7 +88,7 @@ client.call(invocation) { error, value in
     handleError(error)
   }
 
-  print("Result:", value)
+  print(value)
   exit(0)
 }
 

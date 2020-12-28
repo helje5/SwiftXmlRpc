@@ -53,13 +53,19 @@ public struct XmlRpcClient {
   public let session  : URLSession
   public let encoding : String.Encoding?
   
+  @usableFromInline
+  let authorization : String
+  
   @inlinable
-  public init(url: URL, encoding: String.Encoding? = .isoLatin1,
-              session: URLSession = .shared)
+  public init(url           : URL,
+              encoding      : String.Encoding? = .isoLatin1,
+              authorization : String           = "",
+              session       : URLSession       = .shared)
   {
-    self.url      = url
-    self.session  = session
-    self.encoding = encoding
+    self.url           = url
+    self.session       = session
+    self.encoding      = encoding
+    self.authorization = authorization
   }
   
   /**
@@ -85,6 +91,10 @@ public struct XmlRpcClient {
     var req = URLRequest(url: url)
     req.httpMethod = "POST"
     req.httpBody = Data(call.xmlString.utf8)
+    
+    if !authorization.isEmpty {
+      req.addValue(authorization, forHTTPHeaderField: "Authorization")
+    }
         
     let task = session.dataTask(with: req) { data, response, error in
       if let error = error {
