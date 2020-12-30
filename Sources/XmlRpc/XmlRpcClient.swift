@@ -7,6 +7,7 @@
 
 #if canImport(Foundation)
 
+import Dispatch
 import struct Foundation.URL
 import struct Foundation.Data
 
@@ -31,13 +32,47 @@ public extension XmlRpc {
                            session  : URLSession       = .shared)
               -> XmlRpcClient
   {
-    return XmlRpcClient(url: url, session: session)
+    return XmlRpcClient(url: url, encoding: encoding, session: session)
+  }
+  
+  /**
+   * Create a new `XmlRpcClient` object for the given URL.
+   */
+  @inlinable
+  static func createClient(_    url : String,
+                           encoding : String.Encoding? = .isoLatin1,
+                           session  : URLSession       = .shared)
+              -> XmlRpcClient
+  {
+    let parsedURL = URL(string: url) ?? {
+      assertionFailure("invalid URL passed to `createClient`: \(url)")
+      return URL(string: "invalid://url")!
+    }()
+    return createClient(parsedURL, encoding: encoding, session: session)
   }
 }
 
 /**
  * A simple XML-RPC client.
+ *
+ * Blocking call:
+ *
+ *     let client = XmlRpc.createClient("http://ccuw:2001/RPC2")
+ *     try client.system.listMethods()
+ *
+ * Asynchronously call an XML-RPC function with the given parameters:
+ *
+ *     client.call("system.listMethods") { error, value in
+ *       if let error = error {
+ *         print("Call failed with error:", error)
+ *       }
+ *       else {
+ *         print("Result:", value)
+ *       }
+ *     }
+ *
  */
+@dynamicMemberLookup
 public struct XmlRpcClient {
   
   public enum ClientError: Swift.Error {
@@ -132,6 +167,78 @@ public struct XmlRpcClient {
     }
     
     task.resume()
+  }
+  
+  
+  // MARK: - Dynamic Callable
+  
+  /**
+   * This represents an XML-RPC function name, coupled with the client
+   * (endpoint) it lives at. It does not carry the arguments.
+   *
+   * Method names can be namespaced in XML-RPC, e.g. `system.listMethods`.
+   *
+   * When used as a call, this will _block_ until the request has completed.
+   *
+   * Example:
+   *
+   *     let client = XmlRpc.createClient("http://ccuw:2001/RPC2")
+   *     try client.system.listMethods()
+   * 
+   */
+  @dynamicCallable
+  @dynamicMemberLookup
+  public struct FunctionSelector {
+    
+    public let client     : XmlRpcClient
+    public let methodName : String
+    
+    @inlinable
+    public init(client: XmlRpcClient, methodName: String) {
+      self.client     = client
+      self.methodName = methodName
+    }
+    
+    @inlinable
+    public subscript(dynamicMember key: String) -> XmlRpcClient.FunctionSelector {
+      return FunctionSelector(client     : client,
+                              methodName : methodName + "." + key)
+    }
+
+    @discardableResult
+    public func dynamicallyCall(withArguments
+                                  arguments: [ XmlRpcValueRepresentable ])
+                  throws -> XmlRpc.Value
+    {
+      let methodCall = XmlRpc.Call(methodName,
+                                   parameters: arguments.map { $0.xmlRpcValue })
+      
+      // This is not great, but it'll become great once async/await arrives ;-)
+      let semaphore = DispatchSemaphore(value: 0)
+      
+      var result : Result<XmlRpc.Value, Swift.Error>?
+
+      DispatchQueue.global().async {
+        client.call(methodCall) { error, value in
+          if let error = error { result = .failure(error) }
+          else                 { result = .success(value) }
+          semaphore.signal()
+        }
+      }
+      
+      semaphore.wait()
+
+      switch result {
+        case .failure(let error) : throw error
+        case .success(let value) : return value
+        case .none               : return .null
+      }
+    }
+  }
+  
+  @inlinable
+  public subscript(dynamicMember key: String) -> XmlRpcClient.FunctionSelector {
+    return FunctionSelector(client: self, methodName: key)
   }
 }
 
