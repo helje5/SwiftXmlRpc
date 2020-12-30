@@ -9,6 +9,22 @@ public protocol XmlRpcValueRepresentable {
   var xmlRpcValue : XmlRpc.Value { get }
 }
 
+public extension XmlRpc.Call {
+  
+  @inlinable
+  init(_ methodName: String, _ parameters: XmlRpcValueRepresentable...) {
+    self.init(methodName, parameters: parameters.map { $0.xmlRpcValue })
+  }
+}
+
+public extension XmlRpc.Response {
+  
+  @inlinable
+  init(_ value: XmlRpcValueRepresentable) {
+    self = .value(value.xmlRpcValue)
+  }
+}
+
 extension XmlRpc.Value: XmlRpcValueRepresentable {
   @inlinable
   public var xmlRpcValue : XmlRpc.Value { return self }

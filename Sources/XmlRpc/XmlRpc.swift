@@ -95,6 +95,9 @@ public extension XmlRpc { // MARK: - Values
   enum Response: Equatable {
     case fault(Fault)
     case value(Value)
+
+    @inlinable public init(_ value: Value) { self = .value(value) }
+    @inlinable public init(_ fault: Fault) { self = .fault(fault) }
   }
 }
 
