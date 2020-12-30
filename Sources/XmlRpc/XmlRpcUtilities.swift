@@ -13,20 +13,45 @@ public extension XmlRpc.Value {
    * For arrays it does the natural thing and return the array value if within
    * a valid range, otherwise `null`.
    *
-   * For dictionaries this always returns `null`.
+   * For dictionaries this is an expensive (but convenient) operation. It
+   * first sorts the keys, then it grabs the position.
    *
    * All other values return themselves if the index is 0, `null` otherwise.
+   *
+   * There is a corresponding `count` property which returns a matching count
+   * (i.e. 0 for `null`, 1 for base types and the count for collections).
    */
   @inlinable
   subscript(index: Int) -> XmlRpc.Value {
-    guard case .array(let values) = self else {
-      guard index == 0      else { return .null }
-      if case .dictionary = self { return .null }
-      return self
+    switch self {
+      case .array(let values):
+        guard index >= 0 && index < values.count else { return .null }
+        return values[index]
+        
+      case .dictionary(let dict):
+        guard index >= 0 && index < dict.count else { return .null }
+        return dict[dict.keys.sorted()[index]] ?? .null // EXPENSIVE!
+    
+      case .string, .null, .bool, .data, .int, .double, .dateTime:
+        guard index == 0 else { return .null }
+        return self
     }
-    return index >= 0 && index < values.count ? values[index] : .null
   }
-  
+
+  /**
+   * Returns 0 for `null`, 1 for base types and the actual count for
+   * arrays and dictionaries.
+   */
+  @inlinable
+  var count : Int {
+    switch self {
+      case .null: return 0
+      case .string, .bool, .int, .double, .dateTime, .data: return 1
+      case .array     (let elements) : return elements.count
+      case .dictionary(let values)   : return values  .count
+    }
+  }
+
   /**
    * Access an XML-RPC dictionary value by string key.
    *
@@ -37,11 +62,14 @@ public extension XmlRpc.Value {
     guard case .dictionary(let values) = self else { return .null }
     return values[key] ?? .null
   }
+}
 
+public extension XmlRpc.Value {
+  
   @inlinable
   var stringValue : String {
     switch self {
-      case .null               : return  "<null>"
+      case .null               : return "<null>"
       case .string  (let s)    : return s
       case .bool    (let flag) : return flag ? "YES" : "NO"
       case .int     (let v)    : return "\(v)"
@@ -53,12 +81,30 @@ public extension XmlRpc.Value {
   }
   
   @inlinable
-  var count : Int {
+  var intValue : Int? {
     switch self {
-      case .null: return 0
-      case .string, .bool, .int, .double, .dateTime, .data: return 1
-      case .array     (let elements) : return elements.count
-      case .dictionary(let values)   : return values  .count
+      case .null               : return nil
+      case .string  (let s)    : return Int(s)
+      case .bool    (let flag) : return flag ? 1 : 0
+      case .int     (let v)    : return v
+      case .double  (let v)    : return Int(v)
+      case .dateTime           : return nil // FIXME: parse & use utime?
+      case .data               : return nil
+      case .array, .dictionary : return nil
+    }
+  }
+  
+  @inlinable
+  var doubleValue : Double? {
+    switch self {
+      case .null               : return 0.0
+      case .string  (let s)    : return Double(s)
+      case .bool    (let flag) : return flag ? 1 : 0
+      case .int     (let v)    : return Double(v)
+      case .double  (let v)    : return v
+      case .dateTime           : return nil // FIXME: parse & use utime?
+      case .data               : return nil
+      case .array, .dictionary : return nil
     }
   }
 }

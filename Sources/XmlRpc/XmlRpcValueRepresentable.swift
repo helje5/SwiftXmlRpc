@@ -29,7 +29,7 @@ extension Double: XmlRpcValueRepresentable {
   public var xmlRpcValue : XmlRpc.Value { return .double(self) }
 }
 
-public extension Collection where Element : XmlRpcValueRepresentable {
+extension Collection where Element : XmlRpcValueRepresentable {
   
   /**
    * Encoding XML-RPC responses themselves in XML-RPC using the
@@ -38,7 +38,33 @@ public extension Collection where Element : XmlRpcValueRepresentable {
    * - render values within a single-item array
    */
   @inlinable
-  var xmlRpcValue : XmlRpc.Value {
-    .array(map { $0.xmlRpcValue })
+  public var xmlRpcValue : XmlRpc.Value { return .array(map { $0.xmlRpcValue }) }
+}
+
+extension Array   : XmlRpcValueRepresentable
+    where Element : XmlRpcValueRepresentable {}
+extension Set     : XmlRpcValueRepresentable
+    where Element : XmlRpcValueRepresentable {}
+
+extension Dictionary : XmlRpcValueRepresentable
+    where Key       == String,
+          Value      : XmlRpcValueRepresentable
+{
+  
+  @inlinable
+  public var xmlRpcValue : XmlRpc.Value {
+    var mapped = [ String : XmlRpc.Value ]()
+    mapped.reserveCapacity(count)
+    for ( key, value ) in self {
+      mapped[key] = value.xmlRpcValue
+    }
+    return .dictionary(mapped)
   }
+}
+
+import struct Foundation.URL
+
+extension URL: XmlRpcValueRepresentable {
+  @inlinable
+  public var xmlRpcValue : XmlRpc.Value { return absoluteString.xmlRpcValue }
 }
