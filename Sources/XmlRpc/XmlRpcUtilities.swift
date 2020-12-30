@@ -5,6 +5,23 @@
 //  Copyright © 2020 ZeeZide GmbH. All rights reserved.
 //
 
+public extension XmlRpc.Response {
+  
+  /**
+   * Create a fault response from some arbitrary Swift.Error.
+   *
+   * Careful to not expose secret data, it is preferable to manually create
+   * the fault!
+   *
+   * This sets the code to 500 and the reason to the `description` of the
+   * Error.
+   */
+  @inlinable
+  init(_ error: Swift.Error) {
+    self = .fault(.init(code: 500, reason: "\(error)"))
+  }
+}
+
 public extension XmlRpc.Value {
 
   /**
