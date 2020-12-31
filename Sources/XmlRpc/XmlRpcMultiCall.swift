@@ -10,10 +10,10 @@
 public extension XmlRpc.Call {
   
   @inlinable
-  init?(multiCall: XmlRpc.Value) {
+  init?(xmlRpcValue: XmlRpc.Value) {
     // Note: tolerant in consumption
-    guard case .dictionary(let dict) = multiCall else {
-      print("ERROR: invalid Call, not a dict:", multiCall)
+    guard case .dictionary(let dict) = xmlRpcValue else {
+      print("ERROR: invalid Call, not a dict:", xmlRpcValue)
       return nil
     }
     guard let methodName = dict["methodName"]?.stringValue else {
@@ -57,6 +57,13 @@ extension XmlRpc.Call: XmlRpcValueRepresentable {
 }
 
 extension XmlRpc.Fault: XmlRpcValueRepresentable {
+
+  @inlinable
+  public init?(xmlRpcValue: XmlRpc.Value) {
+    guard case .dictionary(let dict) = xmlRpcValue else { return nil }
+    guard case .int(let code) = dict["faultCode"]  else { return nil }
+    self.init(code: code, reason: dict["reason"]?.stringValue ?? "")
+  }
   
   /* Render a fault as an XML-RPC Value */
   @inlinable
@@ -67,6 +74,30 @@ extension XmlRpc.Fault: XmlRpcValueRepresentable {
 
 extension XmlRpc.Response: XmlRpcValueRepresentable {
 
+  @inlinable
+  public init?(xmlRpcValue: XmlRpc.Value) {
+    switch xmlRpcValue {
+      case .dictionary:
+        guard let fault = XmlRpc.Fault(xmlRpcValue: xmlRpcValue) else {
+          return nil
+        }
+        self = .fault(fault)
+        
+      case .array(let list):
+        if list.count == 1 {
+          self = .value(list[0])
+        }
+        else {
+          assertionFailure("expected single item array in multicall response")
+          self = .value(xmlRpcValue)
+        }
+        
+      default:
+        assertionFailure("expected fault-dict or array in multicall response")
+        self = .value(xmlRpcValue)
+    }
+  }
+  
   /**
    * Encoding XML-RPC responses themselves in XML-RPC using the
    * `system.multicall` convention, which says:
