@@ -125,7 +125,19 @@ public struct XmlRpcClient {
   {
     var req = URLRequest(url: url)
     req.httpMethod = "POST"
-    req.httpBody = Data(call.xmlString.utf8)
+    
+    if let charset = encoding?.contentTypeCharset {
+      req.addValue("text/xml; charset=\"\(charset)\"",
+                   forHTTPHeaderField: "Content-Type")
+    }
+    else {
+      req.addValue("text/xml", forHTTPHeaderField: "Content-Type")
+    }
+    
+    let content = Data(call.xmlString.utf8)
+    req.addValue("\(content.count)", forHTTPHeaderField: "Content-Length")
+    
+    req.httpBody = content
     
     if !authorization.isEmpty {
       req.addValue(authorization, forHTTPHeaderField: "Authorization")
@@ -267,6 +279,18 @@ public extension XmlRpcClient {
       $0.xmlRpcValue
     })
     self.call(call, yield: yield)
+  }
+}
+
+internal extension String.Encoding {
+  
+  @usableFromInline
+  var contentTypeCharset: String? {
+    switch self {
+      case .utf8      : return "UTF-8"
+      case .isoLatin1 : return "ISO-8859-1"
+      default         : return nil
+    }
   }
 }
 
