@@ -20,8 +20,13 @@ It can be invoked like that:
 swift run xmlrpc_call "http://yourserver/RPC2" system.listMethods
 ```
 
+Learn more about XML-RPC in Swift in our blog article:
+[Writing an Swift XML-RPC Server](https://www.alwaysrightinstitute.com/macro-xmlrpc/).
+
+
 ### Links
 
+- [Writing an Swift XML-RPC Server](https://www.alwaysrightinstitute.com/macro-xmlrpc/)
 - [XML-RPC](http://xmlrpc.com).com
   - [Spec](http://xmlrpc.com/spec.md)
   - [Original Site](http://1998.xmlrpc.com)
