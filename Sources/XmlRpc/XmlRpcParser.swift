@@ -149,7 +149,7 @@ public extension XmlRpc { // MARK: - Parser
           }
           else { // fault
             #if DEBUG
-              guard case .fault = response else {
+              guard case .some(.fault) = response else {
                 assertionFailure("response expected to be a fault?!")
                 return
               }
@@ -212,7 +212,7 @@ public extension XmlRpc { // MARK: - Parser
           if valueStack[count - 1] == .none {
             currentValue = .string(consumeCDATA())
           }
-          if count > 1, case .array(var values) = valueStack[count - 2] {
+          if count > 1, case .some(.array(var values)) = valueStack[count - 2] {
             guard let element = pop() else {
               assertionFailure("got no array element value!")
               return

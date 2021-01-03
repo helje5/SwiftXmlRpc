@@ -243,9 +243,9 @@ public struct XmlRpcClient {
       semaphore.wait()
 
       switch result {
-        case .failure(let error) : throw error
-        case .success(let value) : return value
-        case .none               : return .null
+        case .some(.failure(let error)) : throw error
+        case .some(.success(let value)) : return value
+        case .none                      : return .null
       }
     }
   }

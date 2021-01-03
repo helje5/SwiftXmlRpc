@@ -61,7 +61,7 @@ extension XmlRpc.Fault: XmlRpcValueRepresentable {
   @inlinable
   public init?(xmlRpcValue: XmlRpc.Value) {
     guard case .dictionary(let dict) = xmlRpcValue else { return nil }
-    guard case .int(let code) = dict["faultCode"]  else { return nil }
+    guard case .some(.int(let code)) = dict["faultCode"]  else { return nil }
     self.init(code: code, reason: dict["reason"]?.stringValue ?? "")
   }
   
