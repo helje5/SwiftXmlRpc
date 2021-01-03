@@ -9,7 +9,7 @@ import struct Foundation.Data
 
 public enum XmlRpc {} // Namespace declaration
 
-#if swift(>=5.1)
+#if swift(>=5.2) // 5.0 has no frozen, and 5.1 warns
 public extension XmlRpc { // MARK: - Values
 
   /**
@@ -155,7 +155,7 @@ extension XmlRpc.Call : CustomStringConvertible {
   
   public var description: String {
     return methodName
-         + "(" + parameters.map(\.description).joined(separator: ", ") + ")"
+         + "(" + parameters.map { $0.description }.joined(separator: ", ") + ")"
   }
 }
 
@@ -173,7 +173,7 @@ extension XmlRpc.Value : CustomStringConvertible {
       case .data    (let v)    : return "<Data: #\(v.count)>"
         
       case .array(let elements):
-        return "[ \(elements.map(\.description).joined(separator: ", ")) ]"
+        return "[ \(elements.map { $0.description }.joined(separator: ", ")) ]"
         
       case .dictionary(let values):
         var ms = "{ "

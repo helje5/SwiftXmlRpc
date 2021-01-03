@@ -142,7 +142,8 @@ public struct XmlRpcClient {
     if !authorization.isEmpty {
       req.addValue(authorization, forHTTPHeaderField: "Authorization")
     }
-        
+    
+    let encoding = self.encoding
     let task = session.dataTask(with: req) { data, response, error in
       if let error = error {
         print("ERROR:", error, response as Any, data as Any)
@@ -230,6 +231,7 @@ public struct XmlRpcClient {
       
       var result : Result<XmlRpc.Value, Swift.Error>?
 
+      let client = self.client
       DispatchQueue.global().async {
         client.call(methodCall) { error, value in
           if let error = error { result = .failure(error) }
