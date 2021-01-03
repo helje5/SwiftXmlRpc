@@ -7,18 +7,11 @@ An XML-RPC parser and a simple XML-RPC client object based upon `URLSession`
 
 Performing a simple call:
 ```swift
-import XmlRpc
+#!/usr/bin/swift sh
+import XmlRpc // AlwaysRightInstitute/SwiftXmlRpc
 
-let client = XmlRpcClient(URL(string: "https://www.xmlrpc.com/RPC2")!)
-
-client.call("system.listMethods") { error, value in
-  if let error = error {
-    print("Call failed with error:", error)
-  }
-  else {
-    print("Result:", value)
-  }
-}
+let client  = XmlRpc.createClient("https://www.xmlrpc.com/RPC2")
+let methods = try client.system.listMethods()
 ```
 
 The package also contains a small XML-RPC commandline client.
@@ -27,8 +20,13 @@ It can be invoked like that:
 swift run xmlrpc_call "http://yourserver/RPC2" system.listMethods
 ```
 
+Learn more about XML-RPC in Swift in our blog article:
+[Writing an Swift XML-RPC Server](https://www.alwaysrightinstitute.com/macro-xmlrpc/).
+
+
 ### Links
 
+- [Writing an Swift XML-RPC Server](https://www.alwaysrightinstitute.com/macro-xmlrpc/)
 - [XML-RPC](http://xmlrpc.com).com
   - [Spec](http://xmlrpc.com/spec.md)
   - [Original Site](http://1998.xmlrpc.com)

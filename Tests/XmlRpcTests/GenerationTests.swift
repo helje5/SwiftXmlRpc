@@ -18,7 +18,7 @@ final class XmlRpcGenerationTests: XCTestCase {
     let xml = call.xmlString
     
     let parsed = XmlRpc.parseResponse(xml)
-    guard case .value(let value) = parsed else {
+    guard case .some(.value(let value)) = parsed else {
       return XCTAssert(false, "got no value! \(parsed as Any)")
     }
     

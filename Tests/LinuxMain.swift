@@ -1,7 +1,6 @@
 import XCTest
-import XmlRpcTests
+@testable import XmlRpcTests
 
 var tests = [ XCTestCaseEntry ]()
-tests += XmlRpcParserTests    .allTests()
-tests += XmlRpcGenerationTests.allTests()
+tests += XmlRpcTests.allTests()
 XCTMain(tests)
