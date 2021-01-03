@@ -1,7 +1,7 @@
 import XCTest
 @testable import XmlRpc
 
-final class XmlRpcParserTests: XCTestCase {
+public final class XmlRpcParserTests: XCTestCase {
   
   func testCallWithStructArray() throws {
     guard let call = XmlRpc.parseCall(TestData.installCall) else {
@@ -71,14 +71,14 @@ final class XmlRpcParserTests: XCTestCase {
 
     // check first
     
-    guard case .dictionary(let subcall) = elements.first else {
+    guard case .some(.dictionary(let subcall)) = elements.first else {
       XCTAssert(false, "unexpected elements: \(elements)")
       return
     }
     print("ELEMENTS:", subcall)
     XCTAssertEqual(subcall["methodName"], "event")
     
-    guard case .array(let params) = subcall["params"] else {
+    guard case .some(.array(let params)) = subcall["params"] else {
       XCTAssert(false, "unexpected params: \(subcall)")
       return
     }
@@ -103,13 +103,13 @@ final class XmlRpcParserTests: XCTestCase {
     }
     
     XCTAssertEqual(elements.count, 1)
-    guard case .dictionary(let subcall) = elements.first else {
+    guard case .some(.dictionary(let subcall)) = elements.first else {
       XCTAssert(false, "unexpected elements: \(elements)")
       return
     }
     XCTAssertEqual(subcall["methodName"], "event")
     
-    guard case .array(let params) = subcall["params"] else {
+    guard case .some(.array(let params)) = subcall["params"] else {
       XCTAssert(false, "unexpected params: \(subcall)")
       return
     }
