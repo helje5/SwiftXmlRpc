@@ -10,7 +10,8 @@ DOCKER=/usr/local/bin/docker
 #DOCKER=docker
 
 # docker config
-SWIFT_BUILD_IMAGE="swift:5.3.1"
+SWIFT_BUILD_IMAGE="swift:5.0"
+#SWIFT_BUILD_IMAGE="swift:5.3.1"
 #SWIFT_BUILD_IMAGE="swift:5.1.3"
 DOCKER_BUILD_DIR=".docker$(SWIFT_BUILD_DIR)"
 SWIFT_DOCKER_BUILD_DIR="$(DOCKER_BUILD_DIR)/x86_64-unknown-linux/$(CONFIGURATION)"
@@ -44,6 +45,13 @@ $(DOCKER_BUILD_PRODUCT): $(SWIFT_SOURCES)
           bash -c 'cd /src && swift build -c $(CONFIGURATION)'
 
 docker-all: $(DOCKER_BUILD_PRODUCT)
+
+docker-test: docker-all
+	$(DOCKER) run --rm \
+          -v "$(PWD):/src" \
+          -v "$(PWD)/$(DOCKER_BUILD_DIR):/src/.build" \
+          "$(SWIFT_BUILD_IMAGE)" \
+          bash -c 'cd /src && swift test -c $(CONFIGURATION)'
 
 docker-clean:
 	rm $(DOCKER_BUILD_PRODUCT)	
