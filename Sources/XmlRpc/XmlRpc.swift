@@ -9,6 +9,7 @@ import struct Foundation.Data
 
 public enum XmlRpc {} // Namespace declaration
 
+#if swift(>=5.1)
 public extension XmlRpc { // MARK: - Values
 
   /**
@@ -36,7 +37,7 @@ public extension XmlRpc { // MARK: - Values
    * (like `[1, "hello", 42]`)
    */
   @frozen
-  struct Call: Equatable, CustomStringConvertible {
+  struct Call: Equatable {
     
     public var methodName = ""
     public var parameters = [ Value ]()
@@ -49,22 +50,6 @@ public extension XmlRpc { // MARK: - Values
     public init(_ methodName: String, parameters: [ Value ]) {
       self.methodName = methodName
       self.parameters = parameters
-    }
-    
-    /**
-     * Access a call parameter by index.
-     */
-    @inlinable
-    public subscript(parameter: Int) -> Value {
-      guard parameter >= 0 && parameter < parameters.count else {
-        return .null
-      }
-      return parameters[parameter]
-    }
-    
-    public var description: String {
-      return methodName
-           + "(" + parameters.map(\.description).joined(separator: ", ") + ")"
     }
   }
   
@@ -98,6 +83,79 @@ public extension XmlRpc { // MARK: - Values
 
     @inlinable public init(_ value: Value) { self = .value(value) }
     @inlinable public init(_ fault: Fault) { self = .fault(fault) }
+  }
+}
+#else // Swift < 5.1
+public extension XmlRpc { // MARK: - Values
+  enum Value: Hashable {
+    
+    case null
+    case string    (String)
+    case bool      (Bool)
+    case int       (Int)
+    case double    (Double)
+    case dateTime  (String) // TBD, timezone? Use DateComponents?
+    case data      (Data)   // base64
+    
+    case array     ([ Value ])
+    case dictionary([ String : Value ])
+  }
+  struct Call: Equatable {
+    
+    public var methodName = ""
+    public var parameters = [ Value ]()
+    
+    @inlinable
+    public init(_ methodName: String, _ parameters: Value...) {
+      self.init(methodName, parameters: parameters)
+    }
+    @inlinable
+    public init(_ methodName: String, parameters: [ Value ]) {
+      self.methodName = methodName
+      self.parameters = parameters
+    }
+    
+  }
+  struct Fault: Swift.Error, Equatable {
+    
+    public let code   : Int
+    public let reason : String
+    
+    @inlinable
+    public init(code: Int, reason: String? = nil) {
+      self.code   = code
+      self.reason = reason ?? "Call failed with code: \(code)"
+    }
+  }
+  enum Response: Equatable {
+    case fault(Fault)
+    case value(Value)
+
+    @inlinable public init(_ value: Value) { self = .value(value) }
+    @inlinable public init(_ fault: Fault) { self = .fault(fault) }
+  }
+}
+#endif
+
+public extension XmlRpc.Call {
+  
+  /**
+   * Access a call parameter by index.
+   */
+  @inlinable
+  subscript(parameter: Int) -> XmlRpc.Value {
+    guard parameter >= 0 && parameter < parameters.count else {
+      return .null
+    }
+    return parameters[parameter]
+  }
+}
+
+extension XmlRpc.Call : CustomStringConvertible {
+  
+  public var description: String {
+    return methodName
+         + "(" + parameters.map(\.description).joined(separator: ", ") + ")"
   }
 }
 
