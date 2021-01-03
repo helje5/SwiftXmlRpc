@@ -6,9 +6,15 @@
 //
 
 import struct   Foundation.Data
-import class    Foundation.XMLParser
-import protocol Foundation.XMLParserDelegate
 import class    Foundation.NSObject
+
+#if canImport(FoundationXML)
+  import class    FoundationXML.XMLParser
+  import protocol FoundationXML.XMLParserDelegate
+#else
+  import class    Foundation.XMLParser
+  import protocol Foundation.XMLParserDelegate
+#endif
 
 public extension XmlRpc { // MARK: - Parser
   
