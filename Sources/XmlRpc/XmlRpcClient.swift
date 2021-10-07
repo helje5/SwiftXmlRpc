@@ -94,13 +94,21 @@ public struct XmlRpcClient {
   @inlinable
   public init(url           : URL,
               encoding      : String.Encoding? = .isoLatin1,
-              authorization : String           = "",
+              authorization : String?          = nil,
               session       : URLSession       = .shared)
   {
     self.url           = url
     self.session       = session
     self.encoding      = encoding
-    self.authorization = authorization
+    self.authorization = authorization ?? {
+      guard let user = url.user, !user.isEmpty else { return "" }
+      let pair = "\(user):\(url.password ?? "")"
+      guard let data = pair.data(using: encoding ?? .utf8) else {
+        assertionFailure("Could not encode login/pwd in encoding?")
+        return ""
+      }
+      return "Basic " + data.base64EncodedString(options: [])
+    }()
   }
   
   /**
