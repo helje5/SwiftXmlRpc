@@ -8,7 +8,7 @@ An XML-RPC parser and a simple XML-RPC client object based upon `URLSession`
 Performing a simple call:
 ```swift
 #!/usr/bin/swift sh
-import XmlRpc // AlwaysRightInstitute/SwiftXmlRpc
+import XmlRpc // helje5/SwiftXmlRpc
 
 let client  = XmlRpc.createClient("https://www.xmlrpc.com/RPC2")
 let methods = try client.system.listMethods()
