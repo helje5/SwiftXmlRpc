@@ -23,6 +23,11 @@ swift run xmlrpc_call "http://yourserver/RPC2" system.listMethods
 Learn more about XML-RPC in Swift in our blog article:
 [Writing an Swift XML-RPC Server](https://www.alwaysrightinstitute.com/macro-xmlrpc/).
 
+Note: Being so old many XML-RPC services still in use are 
+using the ISO Latin 1 charset, which is why the client 
+defaults to that. 
+When interfacing with a newer service, the encoding parameter 
+in createClient may have to be used to configure it for UTF-8.
 
 ### Links
 
