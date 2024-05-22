@@ -42,12 +42,14 @@ in createClient may have to be used to configure it for UTF-8.
 ### Who
 
 **Swift XML-RPC** is brought to you by
-the
-[Always Right Institute](http://www.alwaysrightinstitute.com)
-and
-[ZeeZide](http://zeezide.de).
-We like 
-[feedback](https://twitter.com/ar_institute), 
-GitHub stars, 
-cool [contract work](http://zeezide.com/en/services/services.html),
+[Helge Heß](https://github.com/helje5/) / [ZeeZide](https://zeezide.de).
+We like feedback, GitHub stars, cool contract work, 
 presumably any form of praise you can think of.
+
+**Want to support my work**?
+Buy an [app](https://zeezide.de/en/products/products.html):
+[Code for SQLite3](https://apps.apple.com/us/app/code-for-sqlite3/id1638111010/),
+[Past for iChat](https://apps.apple.com/us/app/past-for-ichat/id1554897185),
+[SVG Shaper](https://apps.apple.com/us/app/svg-shaper-for-swiftui/id1566140414),
+[HMScriptEditor](https://apps.apple.com/us/app/hmscripteditor/id1483239744).
+You don't have to use it! 😀
