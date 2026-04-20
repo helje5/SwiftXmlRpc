@@ -2,21 +2,20 @@
 //  XmlRpc.swift
 //  XmlRpc
 //
-//  Copyright © 2020 ZeeZide GmbH. All rights reserved.
+//  Copyright © 2020-2026 ZeeZide GmbH. All rights reserved.
 //
 
 import struct Foundation.Data
 
 public enum XmlRpc {} // Namespace declaration
 
-#if swift(>=5.2) // 5.0 has no frozen, and 5.1 warns
 public extension XmlRpc { // MARK: - Values
 
   /**
    * The various possible XML-RPC value types.
    */
   @frozen
-  enum Value: Hashable {
+  enum Value: Hashable, Sendable {
     
     case null
     case string    (String)
@@ -37,7 +36,7 @@ public extension XmlRpc { // MARK: - Values
    * (like `[1, "hello", 42]`)
    */
   @frozen
-  struct Call: Equatable {
+  struct Call: Equatable, Sendable {
     
     public var methodName = ""
     public var parameters = [ Value ]()
@@ -85,57 +84,6 @@ public extension XmlRpc { // MARK: - Values
     @inlinable public init(_ fault: Fault) { self = .fault(fault) }
   }
 }
-#else // Swift < 5.1
-public extension XmlRpc { // MARK: - Values
-  enum Value: Hashable {
-    
-    case null
-    case string    (String)
-    case bool      (Bool)
-    case int       (Int)
-    case double    (Double)
-    case dateTime  (String) // TBD, timezone? Use DateComponents?
-    case data      (Data)   // base64
-    
-    case array     ([ Value ])
-    case dictionary([ String : Value ])
-  }
-  struct Call: Equatable {
-    
-    public var methodName = ""
-    public var parameters = [ Value ]()
-    
-    @inlinable
-    public init(_ methodName: String, _ parameters: Value...) {
-      self.init(methodName, parameters: parameters)
-    }
-    @inlinable
-    public init(_ methodName: String, parameters: [ Value ]) {
-      self.methodName = methodName
-      self.parameters = parameters
-    }
-    
-  }
-  struct Fault: Swift.Error, Equatable {
-    
-    public let code   : Int
-    public let reason : String
-    
-    @inlinable
-    public init(code: Int, reason: String? = nil) {
-      self.code   = code
-      self.reason = reason ?? "Call failed with code: \(code)"
-    }
-  }
-  enum Response: Equatable {
-    case fault(Fault)
-    case value(Value)
-
-    @inlinable public init(_ value: Value) { self = .value(value) }
-    @inlinable public init(_ fault: Fault) { self = .fault(fault) }
-  }
-}
-#endif
 
 public extension XmlRpc.Call {
   
