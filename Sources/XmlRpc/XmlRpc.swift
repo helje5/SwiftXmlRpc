@@ -15,7 +15,7 @@ public extension XmlRpc { // MARK: - Values
    * The various possible XML-RPC value types.
    */
   @frozen
-  enum Value: Hashable, Sendable {
+  enum Value: Hashable {
     
     case null
     case string    (String)
@@ -36,7 +36,7 @@ public extension XmlRpc { // MARK: - Values
    * (like `[1, "hello", 42]`)
    */
   @frozen
-  struct Call: Equatable, Sendable {
+  struct Call: Equatable {
     
     public var methodName = ""
     public var parameters = [ Value ]()
@@ -77,6 +77,7 @@ public extension XmlRpc { // MARK: - Values
    */
   @frozen
   enum Response: Equatable {
+    
     case fault(Fault)
     case value(Value)
 
@@ -133,3 +134,10 @@ extension XmlRpc.Value : CustomStringConvertible {
     }
   }
 }
+
+#if swift(>=5.5)
+extension XmlRpc.Value    : Sendable {}
+extension XmlRpc.Call     : Sendable {}
+extension XmlRpc.Fault    : Sendable {}
+extension XmlRpc.Response : Sendable {}
+#endif
